@@ -1,10 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Disunity.EntityFrameworkCore.Hooks.Attributes;
+using Disunity.EntityFrameworkCore.Hooks.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Internal {
+namespace Disunity.EntityFrameworkCore.Hooks {
 
     public class HookManagerContainer {
 

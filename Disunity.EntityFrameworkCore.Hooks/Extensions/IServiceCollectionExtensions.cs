@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Disunity.EntityFrameworkCore.Hooks.Extensions
 {
-    public static class IServiceCollectionExtensions
+    public static class ServiceCollectionExtensions
     {
         public static void ConfigureDbHooks(this IServiceCollection services)
         {

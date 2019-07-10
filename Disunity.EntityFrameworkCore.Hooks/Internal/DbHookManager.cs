@@ -1,29 +1,50 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
-using Disunity.EntityFrameworkCore.Hooks.Extensions;
+using Disunity.EntityFrameworkCore.Hooks.Attributes;
 using Disunity.EntityFrameworkCore.Hooks.Internal.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.Extensions.Logging;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Internal {
-
-    public class DbHookManager<T> : IDbHookManager<T> where T : DbHookAttribute {
-
-        private class HookMap : Dictionary<Type, IList<MethodBase>> { }
+namespace Disunity.EntityFrameworkCore.Hooks.Internal
+{
+    public class DbHookManager<T> : IDbHookManager<T> where T : DbHookAttribute
+    {
+        private class HookMap : Dictionary<Type, IList<MethodBase>>
+        {
+        }
 
         private readonly IDictionary<DbContext, HookMap> _contextHooks = new Dictionary<DbContext, HookMap>();
         private readonly ILogger<DbHookManager<T>> _logger;
         private readonly IServiceProvider _serviceProvider;
 
-        public DbHookManager(ILogger<DbHookManager<T>> logger, IServiceProvider serviceProvider) {
+        private static readonly List<MethodBase> AssemblyHookMethods;
+
+        static DbHookManager()
+        {
+            AssemblyHookMethods = AppDomain.CurrentDomain.GetAssemblies()
+                .SelectMany(GetAttributesFromAssembly)
+                .ToList();
+        }
+
+        public DbHookManager(ILogger<DbHookManager<T>> logger, IServiceProvider serviceProvider)
+        {
             _logger = logger;
             _serviceProvider = serviceProvider;
         }
 
-        private void RegisterHandler(HookMap hooks, Type entityType, MethodBase method) {
-            if (!hooks.ContainsKey(entityType)) {
+        private static IEnumerable<MethodBase> GetAttributesFromAssembly(Assembly assembly)
+        {
+            return assembly.GetTypes().SelectMany(t => t.GetMethods())
+                .Where(m => m.IsStatic && m.GetCustomAttributes<T>().Any());
+        }
+
+        private void RegisterHandler(HookMap hooks, Type entityType, MethodBase method)
+        {
+            if (!hooks.ContainsKey(entityType))
+            {
                 hooks.Add(entityType, new List<MethodBase>());
             }
 
@@ -33,54 +54,65 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal {
                 $"Registered {method.Name} to listen for {typeof(T).Name} on {entityType.Name}");
         }
 
-        private void HandleAttr(HookMap hooks, Type classType, MethodBase method, T hookAttr) {
+        private void HandleAttr(HookMap hooks, Type classType, MethodBase method, T hookAttr,
+            HashSet<Type> allowedTypes)
+        {
             var targetEntityTypes = hookAttr.EntityTypes.Count > 0
                 ? hookAttr.EntityTypes
                 : new List<Type>() {classType};
 
-            targetEntityTypes.ForEach(entityType => RegisterHandler(hooks, entityType, method));
-        }
-
-        private void HandleMethod(HookMap hooks, Type classType, MethodBase method) {
-            foreach (var attr in method.GetCustomAttributes(typeof(T))) {
-                HandleAttr(hooks, classType, method, attr as T);
+            if (!hookAttr.WatchDescendants && !allowedTypes.Contains(classType))
+            {
+                throw new InvalidOperationException(
+                    $"Cannot watch type {classType.Name} as it is not in on the DbContext");
             }
 
-        }
-
-        private void HandleEntityType(HookMap hooks, Type entityType) {
-            for (var derivedType = entityType;
-                 derivedType != typeof(object) && derivedType != null;
-                 derivedType = derivedType.BaseType) {
-
-                var staticMethods = derivedType.GetMethods(BindingFlags.Static | 
-                                                           BindingFlags.Public | 
-                                                           BindingFlags.NonPublic);
-
-                foreach (var method in staticMethods) {
-                    HandleMethod(hooks, entityType, method);
+            targetEntityTypes.ForEach(entityType =>
+            {
+                if (hookAttr.WatchDescendants)
+                {
+                    foreach (var watchType in allowedTypes.Where(t => entityType.IsAssignableFrom(t)))
+                    {
+                        RegisterHandler(hooks, watchType, method);
+                    }
                 }
+                else
+                {
+                    RegisterHandler(hooks, entityType, method);
+                }
+            });
+        }
+
+        private void HandleMethod(HookMap hooks, MethodBase method, HashSet<Type> allowedTypes)
+        {
+            foreach (var attr in method.GetCustomAttributes(typeof(T)))
+            {
+                var classType = method.DeclaringType;
+                HandleAttr(hooks, classType, method, attr as T, allowedTypes);
             }
         }
 
-        public void InitializeForContext(DbContext context) {
+        public void InitializeForContext(DbContext context)
+        {
             var hooks = new HookMap();
 
-            if (!_contextHooks.TryAdd(context, hooks)) {
+            if (!_contextHooks.TryAdd(context, hooks))
+            {
                 throw new InvalidOperationException("Hook Manager has already been initialized with given context");
             }
 
-            var entityTypes = context.DbEntityTypes();
+            var entityTypes = context.DbEntityTypes().ToHashSet();
 
-            foreach (var entityType in context.DbEntityTypes()) {
-                HandleEntityType(hooks, entityType);
-            }
+            AssemblyHookMethods.ForEach(m => HandleMethod(hooks, m, entityTypes));
+
 
             _logger.LogDebug($"Registered {typeof(T).Name} for {hooks.Keys.Count} types");
         }
 
-        public void ExecuteForEntity(DbContext context, EntityEntry entityEntry) {
-            if (!_contextHooks.ContainsKey(context)) {
+        public void ExecuteForEntity(DbContext context, EntityEntry entityEntry)
+        {
+            if (!_contextHooks.ContainsKey(context))
+            {
                 throw new InvalidOperationException(
                     "Must initialize HookManager with context before attempted to execute hooks in that context");
             }
@@ -90,32 +122,40 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal {
             var entityName = entityEntry.Entity.GetType().Name;
 
             _logger.LogInformation(
-                $"Entity Type: {entityName}. Hook Type: {typeof(T).Name} Total Hook Types: {hooks.Keys.Count}");
+                $"Executing {typeof(T).Name} for Entity Type: {entityName}. Total Hook Types: {hooks.Keys.Count}");
+            _logger.LogDebug($"Hooks: {string.Join(";", hooks.SelectMany(h => h.Value).Select(m => m.Name))}");
 
             var entityType = entityEntry.Entity.GetType();
 
-            if (!hooks.ContainsKey(entityType)) {
+            if (!hooks.ContainsKey(entityType))
+            {
                 _logger.LogDebug($"No hooks for {entityName} {typeof(T).Name}");
                 return;
             }
 
             var methods = hooks[entityType];
 
-            var namedArgs = new Dictionary<string, object>() {
-                {"entity", entityEntry.Entity},
-                {"entityEntry", entityEntry},
-                {"services", _serviceProvider},
-                {"serviceProvider", _serviceProvider},
-                {"context", context},
-                {"dbContext", context}
-            };
+            var paramsByType = GenerateParameterDictionary(entityEntry.Entity, entityEntry, _serviceProvider, context);
 
-            foreach (var method in methods) {
-                _logger.LogInformation($"Executing method {method.Name}");
-                method.InvokeWithNamedParameters(null, namedArgs);
+            foreach (var method in methods)
+            {
+                _logger.LogInformation(
+                    $"Executing method {method.Name} for entity type {entityEntry.Entity.GetType()}");
+                _logger.LogInformation($"Param types {string.Join(";", paramsByType.Select(p => $"{p.Key.Name}"))}");
+                method.InvokeWithParamsOfType(null, paramsByType);
             }
         }
 
-    }
+        private IDictionary<Type, object> GenerateParameterDictionary(params object[] parameters)
+        {
+            var parameterDict = new Dictionary<Type, object>();
 
+            foreach (var parameter in parameters)
+            {
+                parameterDict.TryAdd(parameter.GetType(), parameter);
+            }
+
+            return parameterDict;
+        }
+    }
 }

@@ -2,12 +2,18 @@
 <package>
     <metadata>
         <id>$id$</id>
-        <version>$version$</version>
+        <version>$packageVersion$</version>
         <title>$title$</title>
         <authors>$authors$</authors>
         <owners>$authors$</owners>
         <requireLicenseAcceptance>false</requireLicenseAcceptance>
         <description>$description$</description>
+        <projectUrl>$packageProjectUrl$</projectUrl>
+        <repository url="$repositoryUrl$"/>
         <copyright>Copyright 2019</copyright>
+        <dependencies>
+            <dependency id="Microsoft.AspNetCore.Identity.EntityFrameworkCore" version="2.1.0"/>
+            <dependency id="Microsoft.EntityFrameworkCore" version="2.1.0"/>
+        </dependencies>
     </metadata>
 </package>

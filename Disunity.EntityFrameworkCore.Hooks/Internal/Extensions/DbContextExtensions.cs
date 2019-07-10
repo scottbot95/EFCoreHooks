@@ -25,46 +25,5 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
             return context.DbSetTypes().Select(t => t.GetGenericArguments()[0]);
         }
 
-        public static int HookedSaveChanges(this HookedDbContext dbContext, bool acceptAllChangesOnSuccess)
-        {
-            var changedEntities = dbContext._hooks.BeforeSave(dbContext);
-            var numChanges = dbContext.SaveChanges(acceptAllChangesOnSuccess);
-            dbContext._hooks.AfterSave(dbContext, changedEntities);
-            return numChanges;
-        }
-
-        public static async Task<int> HookedSaveChangesAsync(this HookedDbContext dbContext,
-            bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-        {
-            var changedEntities = dbContext._hooks.BeforeSave(dbContext);
-            var numChanges = await dbContext.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-            dbContext._hooks.AfterSave(dbContext, changedEntities);
-            return numChanges;
-        }
-
-        public static int HookedSaveChanges<TUser, TRole, TKey>(
-            this HookedIdentityDbContext<TUser, TRole, TKey> dbContext, bool acceptAllChangesOnSuccess)
-            where TUser : IdentityUser<TKey>
-            where TRole : IdentityRole<TKey>
-            where TKey : IEquatable<TKey>
-        {
-            var changedEntities = dbContext._hooks.BeforeSave(dbContext);
-            var numChanges = dbContext.SaveChanges(acceptAllChangesOnSuccess);
-            dbContext._hooks.AfterSave(dbContext, changedEntities);
-            return numChanges;
-        }
-
-        public static async Task<int> HookedSaveChangesAsync<TUser, TRole, TKey>(
-            this HookedIdentityDbContext<TUser, TRole, TKey> dbContext,
-            bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
-            where TUser : IdentityUser<TKey>
-            where TRole : IdentityRole<TKey>
-            where TKey : IEquatable<TKey>
-        {
-            var changedEntities = dbContext._hooks.BeforeSave(dbContext);
-            var numChanges = await dbContext.SaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-            dbContext._hooks.AfterSave(dbContext, changedEntities);
-            return numChanges;
-        }
     }
 }
