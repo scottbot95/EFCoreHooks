@@ -88,3 +88,24 @@ public class HookedDbContext : DbContext, IHookedDbContext
     }
 }
 ```
+
+### Hooks
+
+The following hooks are available via attributes attached to static methods:
+ - `[OnBeforeCreate]` - Before Model Created
+ - `[OnBeforeUpdate]` - Before Model Modified
+ - `[OnBeforeSave]`   - Before Model Created or Modified
+ - `[OnBeforeDelete]` - Before Model Delete
+ - `[OnAfterCreate]`  - Before Model Created
+ - `[OnAfterUpdate]`  - Before Model Modified
+ - `[OnAfterSave]`    - Before Model Created or Modified
+ - `[OnAfterDelete]`  - Before Model Delete
+
+Each hook has a simple dependency injection container with the following types:
+
+|               Type | Value                                                                                               |
+|-------------------:|-----------------------------------------------------------------------------------------------------|
+| `EntityType`       | The `EntityType` provided by the `ChangeTracker`                                                    |
+| `<Your DbContext>`   | The DbContext the entity is part of. You may use `DbContext` if you just need the common properties |
+| `<Model Type>`       | The entity object that trigger this hook.                                                           |
+| `IServiceProvider` | The main DI container your app is running in (useful for grabbing things like `ILogger<>`)          |
