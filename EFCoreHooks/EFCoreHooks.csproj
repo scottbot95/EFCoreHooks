@@ -9,11 +9,12 @@
         <RepositoryUrl>https://github.com/scottbot95/EFCoreHooks.git</RepositoryUrl>
         <PackageTags>EntityFrameworkCore Hooks</PackageTags>
         <PackageVersion>0.1.0</PackageVersion>
+        <Title>EFCoreHooks</Title>
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.0"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.0"/>
+        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.0" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.0" />
     </ItemGroup>
 
 </Project>
