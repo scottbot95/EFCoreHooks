@@ -1,10 +1,8 @@
-using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Extensions
+namespace EFCoreHooks.Extensions
 {
     public static class DbContextExtensions
     {

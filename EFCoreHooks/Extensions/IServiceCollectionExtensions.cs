@@ -1,7 +1,7 @@
-using Disunity.EntityFrameworkCore.Hooks.Internal;
+using EFCoreHooks.Internal;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Extensions
+namespace EFCoreHooks.Extensions
 {
     public static class ServiceCollectionExtensions
     {

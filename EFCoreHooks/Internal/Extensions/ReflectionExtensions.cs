@@ -2,9 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Microsoft.EntityFrameworkCore.Internal;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
+namespace EFCoreHooks.Internal.Extensions
 {
     internal static class ReflectionExtensions
     {
@@ -19,13 +18,9 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
             var paramTypes = method.GetParameters().Select(p => p.ParameterType).ToArray();
             var parameters = new object[paramTypes.Length];
 
-            for (var i = 0; i < parameters.Length; ++i)
-            {
-                parameters[i] = Type.Missing;
-            }
+            for (var i = 0; i < parameters.Length; ++i) parameters[i] = Type.Missing;
 
             foreach (var (paramType, value) in parametersByType)
-            {
                 try
                 {
                     var paramIndex = paramTypes.ToList().FindIndex(t => t.IsAssignableFrom(paramType));
@@ -35,7 +30,6 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
                 {
                     // ignored
                 }
-            }
 
             return parameters;
         }

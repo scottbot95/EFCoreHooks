@@ -2,12 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
+namespace EFCoreHooks.Internal.Extensions
 {
     public static class DbContextExtensions
     {
@@ -24,6 +21,5 @@ namespace Disunity.EntityFrameworkCore.Hooks.Internal.Extensions
         {
             return context.DbSetTypes().Select(t => t.GetGenericArguments()[0]);
         }
-
     }
 }

@@ -1,22 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using Disunity.EntityFrameworkCore.Hooks.Attributes;
-using Disunity.EntityFrameworkCore.Hooks.Internal;
+using EFCoreHooks.Attributes;
+using EFCoreHooks.Internal;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace Disunity.EntityFrameworkCore.Hooks {
-
-    public class HookManagerContainer {
-
+namespace EFCoreHooks
+{
+    public class HookManagerContainer
+    {
         public HookManagerContainer(IDbHookManager<OnBeforeCreate> onBeforeCreate,
-                                    IDbHookManager<OnBeforeUpdate> onBeforeUpdate,
-                                    IDbHookManager<OnBeforeSave> onBeforeSave,
-                                    IDbHookManager<OnBeforeDelete> onBeforeDelete,
-                                    IDbHookManager<OnAfterCreate> onAfterCreate,
-                                    IDbHookManager<OnAfterUpdate> onAfterUpdate,
-                                    IDbHookManager<OnAfterSave> onAfterSave,
-                                    IDbHookManager<OnAfterDelete> onAfterDelete) {
+            IDbHookManager<OnBeforeUpdate> onBeforeUpdate,
+            IDbHookManager<OnBeforeSave> onBeforeSave,
+            IDbHookManager<OnBeforeDelete> onBeforeDelete,
+            IDbHookManager<OnAfterCreate> onAfterCreate,
+            IDbHookManager<OnAfterUpdate> onAfterUpdate,
+            IDbHookManager<OnAfterSave> onAfterSave,
+            IDbHookManager<OnAfterDelete> onAfterDelete)
+        {
             OnBeforeCreate = onBeforeCreate;
             OnBeforeUpdate = onBeforeUpdate;
             OnBeforeSave = onBeforeSave;
@@ -36,7 +37,8 @@ namespace Disunity.EntityFrameworkCore.Hooks {
         public IDbHookManager<OnAfterSave> OnAfterSave { get; }
         public IDbHookManager<OnAfterDelete> OnAfterDelete { get; }
 
-        public void InitializeForAll(DbContext context) {
+        public void InitializeForAll(DbContext context)
+        {
             OnBeforeCreate.InitializeForContext(context);
             OnBeforeUpdate.InitializeForContext(context);
             OnBeforeSave.InitializeForContext(context);
@@ -46,24 +48,26 @@ namespace Disunity.EntityFrameworkCore.Hooks {
             OnAfterSave.InitializeForContext(context);
             OnAfterDelete.InitializeForContext(context);
         }
-        
-        public SavedChanges BeforeSave(DbContext dbContext) {
+
+        public SavedChanges BeforeSave(DbContext dbContext)
+        {
             var changes = new SavedChanges();
             var handledModels = new HashSet<object>();
             int prevHandledCount;
 
-            do {
+            do
+            {
                 prevHandledCount = handledModels.Count;
                 var entries = dbContext.ChangeTracker.Entries().ToList();
 
-                foreach (var entry in entries) {
-                    if (handledModels.Contains(entry.Entity)) {
-                        continue; // already processed dbContext entity, skip it
-                    }
+                foreach (var entry in entries)
+                {
+                    if (handledModels.Contains(entry.Entity)) continue; // already processed dbContext entity, skip it
 
                     handledModels.Add(entry.Entity);
 
-                    switch (entry.State) {
+                    switch (entry.State)
+                    {
                         case EntityState.Deleted:
                             OnBeforeDelete.ExecuteForEntity(dbContext, entry);
                             changes.Deleted.Add(entry);
@@ -80,7 +84,8 @@ namespace Disunity.EntityFrameworkCore.Hooks {
                             break;
                     }
 
-                    if (entry.State == EntityState.Added || entry.State == EntityState.Modified) {
+                    if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
+                    {
                         OnBeforeSave.ExecuteForEntity(dbContext, entry);
                         changes.Saved.Add(entry);
                     }
@@ -91,27 +96,21 @@ namespace Disunity.EntityFrameworkCore.Hooks {
             return changes;
         }
 
-        public void AfterSave(DbContext dbContext, SavedChanges changes) {
-            foreach (var entity in changes.Added) {
-                OnAfterCreate.ExecuteForEntity(dbContext, entity);
-            }
+        public void AfterSave(DbContext dbContext, SavedChanges changes)
+        {
+            foreach (var entity in changes.Added) OnAfterCreate.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Modified) {
-                OnAfterUpdate.ExecuteForEntity(dbContext, entity);
-            }
+            foreach (var entity in changes.Modified) OnAfterUpdate.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Deleted) {
-                OnAfterDelete.ExecuteForEntity(dbContext, entity);
-            }
+            foreach (var entity in changes.Deleted) OnAfterDelete.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Saved) {
-                OnAfterSave.ExecuteForEntity(dbContext, entity);
-            }
+            foreach (var entity in changes.Saved) OnAfterSave.ExecuteForEntity(dbContext, entity);
         }
 
-        public class SavedChanges {
-
-            public SavedChanges() {
+        public class SavedChanges
+        {
+            public SavedChanges()
+            {
                 Added = new List<EntityEntry>();
                 Modified = new List<EntityEntry>();
                 Deleted = new List<EntityEntry>();
@@ -122,9 +121,6 @@ namespace Disunity.EntityFrameworkCore.Hooks {
             public IList<EntityEntry> Modified { get; }
             public IList<EntityEntry> Deleted { get; }
             public IList<EntityEntry> Saved { get; }
-
-        }        
-
+        }
     }
-
 }

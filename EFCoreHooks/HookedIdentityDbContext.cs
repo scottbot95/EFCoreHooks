@@ -1,14 +1,12 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Disunity.EntityFrameworkCore.Hooks.Extensions;
-using Disunity.EntityFrameworkCore.Hooks.Internal.Extensions;
+using EFCoreHooks.Extensions;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 
-
-namespace Disunity.EntityFrameworkCore.Hooks
+namespace EFCoreHooks
 {
     public class HookedIdentityDbContext : HookedIdentityDbContext<IdentityUser, IdentityRole, string>
     {
@@ -39,12 +37,23 @@ namespace Disunity.EntityFrameworkCore.Hooks
         where TRole : IdentityRole<TKey>
         where TKey : IEquatable<TKey>
     {
-        public HookManagerContainer Hooks { get; }
-
         public HookedIdentityDbContext(DbContextOptions options, HookManagerContainer hooks) : base(options)
         {
             Hooks = hooks;
             Hooks.InitializeForAll(this);
+        }
+
+        public HookManagerContainer Hooks { get; }
+
+        public int SaveChangesBase(bool acceptAllChanges)
+        {
+            return base.SaveChanges(acceptAllChanges);
+        }
+
+        public Task<int> SaveChangesBaseAsync(bool acceptAllChanges,
+            CancellationToken cancellationToken = default(CancellationToken))
+        {
+            return base.SaveChangesAsync(acceptAllChanges, cancellationToken);
         }
 
         public override int SaveChanges(bool acceptAllChangesOnSuccess)
@@ -56,17 +65,6 @@ namespace Disunity.EntityFrameworkCore.Hooks
             CancellationToken cancellationToken = default(CancellationToken))
         {
             return this.HookedSaveChangesAsync(acceptAllChangesOnSuccess, cancellationToken);
-        }
-
-        public int SaveChangesBase(bool acceptAllChanges)
-        {
-            return base.SaveChanges(acceptAllChanges);
-        }
-
-        public Task<int> SaveChangesBaseAsync(bool acceptAllChanges,
-            CancellationToken cancellationToken = default(CancellationToken))
-        {
-            return base.SaveChangesAsync(acceptAllChanges, cancellationToken);
         }
     }
 }
