@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using EFCoreHooks.Attributes;
 using EFCoreHooks.Internal.Extensions;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ namespace EFCoreHooks.Internal
         {
             AssemblyHookMethods = AppDomain.CurrentDomain.GetAssemblies()
                 .SelectMany(GetAttributesFromAssembly)
+                .Where(m => m.GetCustomAttributes<T>().Any())
                 .ToList();
         }
 
@@ -46,7 +48,7 @@ namespace EFCoreHooks.Internal
             _logger.LogDebug($"Registered {typeof(T).Name} for {hooks.Keys.Count} types");
         }
 
-        public void ExecuteForEntity(DbContext context, EntityEntry entityEntry)
+        public async Task ExecuteForEntity(DbContext context, EntityEntry entityEntry)
         {
             if (!_contextHooks.ContainsKey(context))
                 throw new InvalidOperationException(
@@ -77,7 +79,13 @@ namespace EFCoreHooks.Internal
                 _logger.LogInformation(
                     $"Executing method {method.Name} for entity type {entityEntry.Entity.GetType()}");
                 _logger.LogInformation($"Param types {string.Join(";", paramsByType.Select(p => $"{p.Key.Name}"))}");
-                method.InvokeWithParamsOfType(null, paramsByType);
+                _logger.LogDebug("Invoking method");
+                var result = method.InvokeWithParamsOfType(null, paramsByType);
+                _logger.LogDebug($"Hook result: {result}");
+                if (result != null && result is Task task)
+                {
+                    await task;
+                }
             }
         }
 

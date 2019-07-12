@@ -9,9 +9,11 @@ namespace EFCoreHooks.Extensions
         public static int HookedSaveChanges<TContext>(this TContext dbContext, bool acceptAllChangesOnSuccess)
             where TContext : DbContext, IHookedDbContext
         {
-            var changedEntities = dbContext.Hooks.BeforeSave(dbContext);
+            var changedTask = dbContext.Hooks.BeforeSave(dbContext);
+            changedTask.Wait();
+            var changedEntities = changedTask.Result;
             var numChanges = dbContext.SaveChangesBase(acceptAllChangesOnSuccess);
-            dbContext.Hooks.AfterSave(dbContext, changedEntities);
+            dbContext.Hooks.AfterSave(dbContext, changedEntities).Wait();
             return numChanges;
         }
 
@@ -19,9 +21,9 @@ namespace EFCoreHooks.Extensions
             bool acceptAllChangesOnSuccess, CancellationToken cancellationToken = default(CancellationToken))
             where TContext : DbContext, IHookedDbContext
         {
-            var changedEntities = dbContext.Hooks.BeforeSave(dbContext);
+            var changedEntities = await dbContext.Hooks.BeforeSave(dbContext);
             var numChanges = await dbContext.SaveChangesBaseAsync(acceptAllChangesOnSuccess, cancellationToken);
-            dbContext.Hooks.AfterSave(dbContext, changedEntities);
+            await dbContext.Hooks.AfterSave(dbContext, changedEntities);
             return numChanges;
         }
     }

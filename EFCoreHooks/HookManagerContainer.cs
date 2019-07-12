@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using EFCoreHooks.Attributes;
 using EFCoreHooks.Internal;
 using Microsoft.EntityFrameworkCore;
@@ -49,7 +50,7 @@ namespace EFCoreHooks
             OnAfterDelete.InitializeForContext(context);
         }
 
-        public SavedChanges BeforeSave(DbContext dbContext)
+        public async Task<SavedChanges> BeforeSave(DbContext dbContext)
         {
             var changes = new SavedChanges();
             var handledModels = new HashSet<object>();
@@ -69,24 +70,24 @@ namespace EFCoreHooks
                     switch (entry.State)
                     {
                         case EntityState.Deleted:
-                            OnBeforeDelete.ExecuteForEntity(dbContext, entry);
+                            await OnBeforeDelete.ExecuteForEntity(dbContext, entry);
                             changes.Deleted.Add(entry);
                             break;
 
                         case EntityState.Modified:
-                            OnBeforeUpdate.ExecuteForEntity(dbContext, entry);
+                            await OnBeforeUpdate.ExecuteForEntity(dbContext, entry);
                             changes.Modified.Add(entry);
                             break;
 
                         case EntityState.Added:
-                            OnBeforeCreate.ExecuteForEntity(dbContext, entry);
+                            await OnBeforeCreate.ExecuteForEntity(dbContext, entry);
                             changes.Added.Add(entry);
                             break;
                     }
 
                     if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
                     {
-                        OnBeforeSave.ExecuteForEntity(dbContext, entry);
+                        await OnBeforeSave.ExecuteForEntity(dbContext, entry);
                         changes.Saved.Add(entry);
                     }
                 }
@@ -96,15 +97,15 @@ namespace EFCoreHooks
             return changes;
         }
 
-        public void AfterSave(DbContext dbContext, SavedChanges changes)
+        public async Task AfterSave(DbContext dbContext, SavedChanges changes)
         {
-            foreach (var entity in changes.Added) OnAfterCreate.ExecuteForEntity(dbContext, entity);
+            foreach (var entity in changes.Added) await OnAfterCreate.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Modified) OnAfterUpdate.ExecuteForEntity(dbContext, entity);
+            foreach (var entity in changes.Modified) await OnAfterUpdate.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Deleted) OnAfterDelete.ExecuteForEntity(dbContext, entity);
+            foreach (var entity in changes.Deleted) await OnAfterDelete.ExecuteForEntity(dbContext, entity);
 
-            foreach (var entity in changes.Saved) OnAfterSave.ExecuteForEntity(dbContext, entity);
+            foreach (var entity in changes.Saved) await OnAfterSave.ExecuteForEntity(dbContext, entity);
         }
 
         public class SavedChanges

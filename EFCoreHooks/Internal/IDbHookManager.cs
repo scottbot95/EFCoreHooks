@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using EFCoreHooks.Attributes;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -8,6 +9,6 @@ namespace EFCoreHooks.Internal
     {
         void InitializeForContext(DbContext context);
 
-        void ExecuteForEntity(DbContext context, EntityEntry entityEntry);
+        Task ExecuteForEntity(DbContext context, EntityEntry entityEntry);
     }
 }
