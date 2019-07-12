@@ -1,20 +1,15 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
-
-    <PropertyGroup>
-        <TargetFramework>netcoreapp2.1</TargetFramework>
-        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-        <Authors>Scott Techau</Authors>
-        <Description>A simple attribute-based hooking system for Entity Framework Core &gt;= 2.1.0</Description>
-        <PackageProjectUrl>https://github.com/scottbot95/EFCoreHooks</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/scottbot95/EFCoreHooks.git</RepositoryUrl>
-        <PackageTags>EntityFrameworkCore Hooks</PackageTags>
-        <PackageVersion>0.1.0</PackageVersion>
-        <Title>EFCoreHooks</Title>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="2.1.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore" Version="2.1.0" />
-    </ItemGroup>
-
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>Scott Techau</Authors>
+    <Description>A simple attribute-based hooking system for Entity Framework Core &gt;= 2.1.0</Description>
+    <PackageProjectUrl>https://github.com/scottbot95/EFCoreHooks</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/scottbot95/EFCoreHooks.git</RepositoryUrl>
+    <PackageTags>EntityFrameworkCore Hooks</PackageTags>
+    <PackageVersion>0.1.0</PackageVersion>
+    <Title>EFCoreHooks</Title>
+  </PropertyGroup>
+  <Import Project="..\.paket\Paket.Restore.targets" />
 </Project>
