@@ -1,0 +1,8 @@
+Microsoft.AspNetCore.Identity.EntityFrameworkCore
+Microsoft.NET.Test.Sdk
+Microsoft.EntityFrameworkCore
+Microsoft.Extensions.DependencyInjection
+Microsoft.Extensions.Logging
+xunit
+xunit.runner.visualstudio
+Microsoft.EntityFrameworkCore.InMemory
