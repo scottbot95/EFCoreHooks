@@ -79,7 +79,6 @@ namespace EFCoreHooks.Internal
                 _logger.LogInformation(
                     $"Executing method {method.Name} for entity type {entityEntry.Entity.GetType()}");
                 _logger.LogInformation($"Param types {string.Join(";", paramsByType.Select(p => $"{p.Key.Name}"))}");
-                _logger.LogDebug("Invoking method");
                 var result = method.InvokeWithParamsOfType(null, paramsByType);
                 _logger.LogDebug($"Hook result: {result}");
                 if (result != null && result is Task task)

@@ -2,3 +2,6 @@
 **/bin/
 
 *.nupkg
+nupkg/
+paket-files/
+packages/

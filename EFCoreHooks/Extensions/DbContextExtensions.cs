@@ -9,9 +9,7 @@ namespace EFCoreHooks.Extensions
         public static int HookedSaveChanges<TContext>(this TContext dbContext, bool acceptAllChangesOnSuccess)
             where TContext : DbContext, IHookedDbContext
         {
-            var changedTask = dbContext.Hooks.BeforeSave(dbContext);
-            changedTask.Wait();
-            var changedEntities = changedTask.Result;
+            var changedEntities = dbContext.Hooks.BeforeSave(dbContext).Result;
             var numChanges = dbContext.SaveChangesBase(acceptAllChangesOnSuccess);
             dbContext.Hooks.AfterSave(dbContext, changedEntities).Wait();
             return numChanges;
