@@ -2,6 +2,8 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCoreHooks", "EFCoreHooks\EFCoreHooks.csproj", "{FE8BF189-9623-43ED-A5CE-F834C1975718}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EFCoreHooks.Test", "EFCoreHooks.Test\EFCoreHooks.Test.csproj", "{1B3F59D5-0BD1-43E7-AD5D-36D68EC92F94}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -12,5 +14,9 @@ Global
 		{FE8BF189-9623-43ED-A5CE-F834C1975718}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FE8BF189-9623-43ED-A5CE-F834C1975718}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FE8BF189-9623-43ED-A5CE-F834C1975718}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1B3F59D5-0BD1-43E7-AD5D-36D68EC92F94}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1B3F59D5-0BD1-43E7-AD5D-36D68EC92F94}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1B3F59D5-0BD1-43E7-AD5D-36D68EC92F94}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1B3F59D5-0BD1-43E7-AD5D-36D68EC92F94}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
